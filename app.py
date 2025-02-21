@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel
-from textSummarizer.pipeline.prediction import PredictionPipeline
+from textsummarizer.pipeline.prediction import PredictionPipeline
 
 app = FastAPI()
 
