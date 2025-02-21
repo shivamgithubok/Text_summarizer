@@ -1,62 +1,30 @@
-import streamlit as st
+from fastapi import FastAPI, Request
+from fastapi.templating import Jinja2Templates
+from fastapi.responses import HTMLResponse, JSONResponse
+from pydantic import BaseModel
 from textSummarizer.pipeline.prediction import PredictionPipeline
 
-# Title of the app
-st.title('Text Summarization')
+app = FastAPI()
 
-# Dark mode toggle
-dark_mode = st.checkbox("🌙 Toggle Dark Mode")
+# Load Jinja2 templates
+templates = Jinja2Templates(directory="templates")
 
-# Styling based on dark mode
-if dark_mode:
-    st.markdown("""
-    <style>
-        body {
-            background-color: #121212;
-            color: white;
-        }
-        .stTextInput, .stTextArea {
-            background-color: #333;
-            color: white;
-        }
-        .stButton button {
-            background-color: #007bff;
-        }
-    </style>
-    """, unsafe_allow_html=True)
-else:
-    st.markdown("""
-    <style>
-        body {
-            background-color: #f8f8f8;
-            color: #333;
-        }
-        .stTextInput, .stTextArea {
-            background-color: #fff;
-            color: #333;
-        }
-        .stButton button {
-            background-color: #007bff;
-        }
-    </style>
-    """, unsafe_allow_html=True)
+@app.get("/", response_class=HTMLResponse)
+async def home(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
-# Input field for text
-text = st.text_area("Enter Text", height=150)
+class TextRequest(BaseModel):
+    text: str
 
-# Character counter
-st.write(f"Characters: {len(text)}")
+@app.post("/predict")
+async def predict_route(request: TextRequest):
+    try:
+        obj = PredictionPipeline()
+        result = obj.predict(request.text)
+        return JSONResponse(content={"summary": result})
+    except Exception as e:
+        return JSONResponse(content={"error": str(e)}, status_code=500)
 
-# Button to trigger summarization
-if st.button("Summarize"):
-    if text.strip():
-        st.write("⏳ Summarizing...")
-        try:
-            obj = PredictionPipeline()
-            result = obj.predict(text)
-            st.subheader("Summary")
-            st.write(result)
-        except Exception as e:
-            st.error(f"Error: {str(e)}")
-    else:
-        st.warning("Please enter some text before summarizing!")
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="127.0.0.1", port=8080)
