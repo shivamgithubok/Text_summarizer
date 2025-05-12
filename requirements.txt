@@ -30,4 +30,4 @@ ensure
 pyyaml
 pyttsx3
 PyMuPDF
-
+fitz
