@@ -1,6 +1,7 @@
 # conda create -n textS python=3.8
 #conda activate textS
 #conda deactivate
+$env:pythonPATH = "src"
 transformers
 transformers[sentencepiece]
 datasets
@@ -23,3 +24,9 @@ uvicorn==0.18.3
 Jinja2==3.1.2
 -e .
 streamlit
+python-box
+fastapi
+ensure
+pyyaml
+pyttsx3
+PyMuPDF

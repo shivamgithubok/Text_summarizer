@@ -31,15 +31,30 @@
             border: 2px solid #ccc;
             border-radius: 8px;
             background-color: #fff;
+            position: relative;
         }
         .dark-mode .box {
             background-color: #222;
             border-color: #444;
         }
+        .fullscreen {
+            position: fixed;
+            top: 10%;
+            left: 10%;
+            width: 80%;
+            height: 80%;
+            z-index: 1000;
+            background-color: white;
+            border: 2px solid #007bff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+        .dark-mode .fullscreen {
+            background-color: #222;
+        }
         textarea {
             width: 100%;
-            height: 150px;
-            padding: 10px;
+            height: 197px;
+            padding: 2px;
             font-size: 16px;
             border: 1px solid #ccc;
             border-radius: 5px;
@@ -69,6 +84,18 @@
             font-size: 14px;
             color: #666;
         }
+        .maximize-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        .file-input {
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -79,16 +106,21 @@
     <div class="container">
         <!-- Input Box -->
         <div class="box">
+            <button class="maximize-btn" onclick="toggleMaximize(this)">🔳</button>
             <h3>Enter Text</h3>
             <textarea id="inputText" placeholder="Type your text here..."></textarea>
+            <input type="file" id="fileInput" class="file-input" accept=".pdf" onchange="parsePDF()">
+            <input type="url" id="urlInput" class="file-input" placeholder="Enter URL" onblur="fetchTextFromURL()">
             <p id="charCount">Characters: 0</p>
         </div>
 
         <!-- Prediction Box -->
         <div class="box">
+            <button class="maximize-btn" onclick="toggleMaximize(this)">🔳</button>
             <h3>Summary</h3>
             <div id="summary">Your summary will appear here...</div>
-        </div>
+            <button onclick="speakSummary()">🔊 Speak Summary</button>
+        </div>        
     </div>
 
     <button onclick="summarizeText()">Summarize</button>
@@ -131,6 +163,96 @@
                 document.getElementById("loading").style.display = "none";
             }
         }
+
+        // Toggle Maximize
+        function toggleMaximize(button) {
+            let box = button.parentElement;
+            box.classList.toggle("fullscreen");
+        }
+
+
+        //pdf
+        async function parsePDF() {
+            let fileInput = document.getElementById("fileInput");
+            let file = fileInput.files[0];
+        
+            if (!file) {
+                alert("Please select a PDF file.");
+                return;
+            }
+        
+            let formData = new FormData();
+            formData.append("file", file);
+        
+            try {
+                let response = await fetch("/upload_pdf", {
+                    method: "POST",
+                    body: formData
+                });
+        
+                let data = await response.json();
+                if (response.ok) {
+                    // Automatically insert extracted text into textarea
+                    document.getElementById("inputText").value = data.text;
+                    document.getElementById("charCount").innerText = "Characters: " + data.text.length;
+                } else {
+                    alert("Not able to convert to text.");
+                    console.error("Error:", data.error);
+                }
+            } catch (error) {
+                alert("Error processing PDF.");
+                console.error("Fetch error:", error);
+            }
+        }       
+        function speakSummary() {
+            let summaryText = document.getElementById("summary").innerText;
+            if (!summaryText || summaryText === "Your summary will appear here...") {
+                alert("No summary available to read.");
+                return;
+            }
+    
+            let speech = new SpeechSynthesisUtterance();
+            speech.text = summaryText;
+            speech.lang = "en-US";  // Set language (change as needed)
+            speech.rate = 1; // Normal speed
+            speech.pitch = 1; // Normal pitch
+    
+            window.speechSynthesis.speak(speech);
+        }    
+
+        async function fetchTextFromURL() {
+            let url = document.getElementById("urlInput").value.trim();
+            
+            if (!url) {
+                alert("Please enter a valid URL.");
+                return;
+            }
+        
+            document.getElementById("loading").style.display = "block";
+        
+            try {
+                let response = await fetch("/scrape", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ url: url })
+                });
+        
+                let data = await response.json();
+                
+                if (response.ok) {
+                    document.getElementById("inputText").value = data.text;
+                    document.getElementById("charCount").innerText = "Characters: " + data.text.length;
+                } else {
+                    alert("Failed to scrape the website.");
+                    console.error("Error:", data.error);
+                }
+            } catch (error) {
+                alert("Error fetching text.");
+                console.error("Fetch error:", error);
+            } finally {
+                document.getElementById("loading").style.display = "none";
+            }
+        }        
     </script>
 
 </body>
