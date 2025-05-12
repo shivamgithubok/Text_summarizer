@@ -24,9 +24,13 @@ uvicorn==0.18.3
 Jinja2==3.1.2
 -e .
 streamlit
+<<<<<<< HEAD
 python-box
 fastapi
 ensure
 pyyaml
 pyttsx3
 PyMuPDF
+=======
+$env:pythonPATH = "src"
+>>>>>>> e480cb30c9aad6ae0c3cb9d2abb91c57b5d094e9
