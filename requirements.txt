@@ -31,6 +31,4 @@ ensure
 pyyaml
 pyttsx3
 PyMuPDF
-=======
-$env:pythonPATH = "src"
->>>>>>> e480cb30c9aad6ae0c3cb9d2abb91c57b5d094e9
+
