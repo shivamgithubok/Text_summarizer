@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 import streamlit as st
 from Pdf_convert.pdf_utils import extract_text_from_pdf
 from Pdf_convert.preprocess import preprocess_text
