@@ -7,13 +7,13 @@ from Pdf_convert.text_to_speech import text_to_speech
 from bs4 import BeautifulSoup
 import requests
 import os
-=======
+
 from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel
 from src.textsummarizer.pipeline.prediction import PredictionPipeline
->>>>>>> e480cb30c9aad6ae0c3cb9d2abb91c57b5d094e9
+
 
 st.title("Text Summarizer App")
 
@@ -64,12 +64,12 @@ if st.button("Scrape"):
         scraped_text = " ".join([p.get_text() for p in paragraphs[:5]])
         st.text_area("Scraped Text", scraped_text, height=200)
     except Exception as e:
-<<<<<<< HEAD
+
         st.error(f"Web Scraping Error: {str(e)}")
-=======
+
         return JSONResponse(content={"error": str(e)}, status_code=500)
 
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=8080)
->>>>>>> e480cb30c9aad6ae0c3cb9d2abb91c57b5d094e9
+
